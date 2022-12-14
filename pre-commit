@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Check if there are any modified Dockerfiles
+MODIFIED_DOCKERFILES=$(git diff --cached --name-only | grep "Dockerfile")
+if [ -z "$MODIFIED_DOCKERFILES" ]; then
+    # No modified Dockerfiles, so skip this hook
+    exit 0
+fi
+
+# Check if each modified Dockerfile contains the required fields
+for f in $MODIFIED_DOCKERFILES; do
+    if ! grep -q "version" "$f" || ! grep -q "name" "$f"; then
+        echo "ERROR: File $f does not contain the required fields"
+        exit 1
+    fi
+done
+
+# All modified Dockerfiles contain the required fields, so allow the commit
+exit 0
