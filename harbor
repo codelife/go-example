@@ -1,0 +1,41 @@
+import requests
+
+# Replace with your Harbor hostname
+HARBOR_HOST = "http://your-harbor-host"
+
+# Replace with your Harbor API token
+API_TOKEN = "your-api-token"
+
+# Set the HTTP headers
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {API_TOKEN}",
+}
+
+# Get a list of all projects in Harbor
+response = requests.get(f"{HARBOR_HOST}/api/projects", headers=headers)
+
+# Check the status code of the response
+if response.status_code != 200:
+    print(f"Failed to get projects: {response.text}")
+    exit(1)
+
+# Print the name of each project
+for project in response.json():
+    print(project["name"])
+
+# For each project, get a list of all image tags
+for project in response.json():
+    # Get the tags for the current project
+    response = requests.get(
+        f"{HARBOR_HOST}/api/repositories/{project['name']}/tags", headers=headers
+    )
+
+    # Check the status code of the response
+    if response.status_code != 200:
+        print(f"Failed to get tags for project {project['name']}: {response.text}")
+        continue
+
+    # Print the name of each tag
+    for tag in response.json():
+        print(f"{project['name']}:{tag['name']}")
