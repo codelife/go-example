@@ -39,3 +39,51 @@ for project in response.json():
     # Print the name of each tag
     for tag in response.json():
         print(f"{project['name']}:{tag['name']}")
+        
+        
+import requests
+
+# Replace with your Harbor hostname
+HARBOR_HOST = "http://your-harbor-host"
+
+# Replace with your Harbor username and password
+USERNAME = "your-username"
+PASSWORD = "your-password"
+
+# Set the HTTP headers
+headers = {
+    "Content-Type": "application/json",
+}
+
+# Set the login credentials in the request body
+data = {
+    "principal": USERNAME,
+    "password": PASSWORD,
+}
+
+# Login to Harbor
+response = requests.post(f"{HARBOR_HOST}/api/login", json=data, headers=headers)
+
+# Check the status code of the response
+if response.status_code != 200:
+    print(f"Failed to login: {response.text}")
+    exit(1)
+
+# Get the access token from the response
+access_token = response.json()["access_token"]
+
+# Set the access token in the HTTP headers
+headers["Authorization"] = f"Bearer {access_token}"
+
+# Get a list of all projects in Harbor
+response = requests.get(f"{HARBOR_HOST}/api/projects", headers=headers)
+
+# Check the status code of the response
+if response.status_code != 200:
+    print(f"Failed to get projects: {response.text}")
+    exit(1)
+
+# Print the name of each project
+for project in response.json():
+    print(project["name"])
+
